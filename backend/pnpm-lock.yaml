@@ -207,6 +207,9 @@ importers:
 
   .:
     dependencies:
+      '@supabase/supabase-js':
+        specifier: ^2.112.3
+        version: 2.112.3
       better-sqlite3:
         specifier: ^13.0.3
         version: 13.0.3
@@ -396,6 +399,38 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@supabase/auth-js@2.112.3':
+    resolution: {integrity: sha512-NA0rsgAlWZPvbhw8aUdmgfpHVgUAcd8zK5ov43l++o1bLIPXZhRiAlRobhwF5AatQuovpqxsMH50F4oyyV4XZw==}
+    engines: {node: '>=22.0.0'}
+
+  '@supabase/functions-js@2.112.3':
+    resolution: {integrity: sha512-gfv481mTOVWtZIJgXupxZpni2V2UWPf6jeF/jOK7HdMHdH+mt6sU0sHHwf0POsPip8ltlulu9OUHgwVzl5ddRw==}
+    engines: {node: '>=22.0.0'}
+
+  '@supabase/phoenix@0.4.5':
+    resolution: {integrity: sha512-aAn9H9ovVyeApKy11OWOrrOGq8DV68yWeH4ud2lN9fzn4aO8Zb5GLL9m1pUg9nLqIcT+ZDfAcsZe0E/nqdv2lw==}
+
+  '@supabase/postgrest-js@2.112.3':
+    resolution: {integrity: sha512-+Mf6uCpzr00bqxwX8hTK2X2L9eAL/1vuOjdEjx6upz9ulb0RmQT16XeU/JkMUlVHw/B46ZnPa2busY4Kd9YCzw==}
+    engines: {node: '>=22.0.0'}
+
+  '@supabase/realtime-js@2.112.3':
+    resolution: {integrity: sha512-E6wljXWs7DUOloyIB69i3YFInWE6IyCvgTAbQ0KYxOHv26FdA1KzEXTuzxrYEdf70t406Z9BRwUlGyclGF2FXA==}
+    engines: {node: '>=22.0.0'}
+
+  '@supabase/storage-js@2.112.3':
+    resolution: {integrity: sha512-oSK61tzlUvg+BWPqpKQCu9qqonsO26btaoAR9D6Gest2aj7xUqToj9rKyaoYOJczkhg9BjqA1REbYy9tPI4bDA==}
+    engines: {node: '>=22.0.0'}
+
+  '@supabase/supabase-js@2.112.3':
+    resolution: {integrity: sha512-Jv1bxVQmEJNkjvPEhFaKjPzsh+Ozyew6lWGD+SoYcsclDEP1z7yEvKvfUQfzy0DkxRIQnZNxmmWtAzw5XLTQoA==}
+    engines: {node: '>=22.0.0'}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.0.0'
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
 
   '@types/better-sqlite3@9.6.0':
     resolution: {integrity: sha512-ZEEwBSgMu7GYJOynoagg5X9JbxfL6dTJDsgViJIqh67jV44kyOr9RXfmFjLK5rzC4MWssP06t9hu/JwGDnUbCg==}
@@ -701,6 +736,10 @@ packages:
     resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
 
+  iceberg-js@0.8.1:
+    resolution: {integrity: sha512-1dhVQZXhcHje7798IVM+xoo/1ZdVfzOMIc8/rgVSijRK38EDqOJoGula9N/8ZI5RD8QTxNQtK/Gozpr+qUqRRA==}
+    engines: {node: '>=20.0.0'}
+
   iconv-lite@0.7.3:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
@@ -826,6 +865,9 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
+  tslib@2.8.1:
+    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
   tsx@4.23.12:
     resolution: {integrity: sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q==}
     engines: {node: '>=18.0.0'}
@@ -933,6 +975,38 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@supabase/auth-js@2.112.3':
+    dependencies:
+      tslib: 2.8.1
+
+  '@supabase/functions-js@2.112.3':
+    dependencies:
+      tslib: 2.8.1
+
+  '@supabase/phoenix@0.4.5': {}
+
+  '@supabase/postgrest-js@2.112.3':
+    dependencies:
+      tslib: 2.8.1
+
+  '@supabase/realtime-js@2.112.3':
+    dependencies:
+      '@supabase/phoenix': 0.4.5
+      tslib: 2.8.1
+
+  '@supabase/storage-js@2.112.3':
+    dependencies:
+      iceberg-js: 0.8.1
+      tslib: 2.8.1
+
+  '@supabase/supabase-js@2.112.3':
+    dependencies:
+      '@supabase/auth-js': 2.112.3
+      '@supabase/functions-js': 2.112.3
+      '@supabase/postgrest-js': 2.112.3
+      '@supabase/realtime-js': 2.112.3
+      '@supabase/storage-js': 2.112.3
 
   '@types/better-sqlite3@9.6.0':
     dependencies:
@@ -1239,6 +1313,8 @@ snapshots:
       statuses: 2.0.2
       toidentifier: 1.0.1
 
+  iceberg-js@0.8.1: {}
+
   iconv-lite@0.7.3:
     dependencies:
       safer-buffer: 2.1.2
@@ -1372,6 +1448,8 @@ snapshots:
   statuses@2.0.2: {}
 
   toidentifier@1.0.1: {}
+
+  tslib@2.8.1: {}
 
   tsx@4.23.12:
     dependencies:
