@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { useJobStore } from '../../store/jobStore';
-import type { Payment, PaymentRecipient } from '../../types';
+import type { PaymentRecipient } from '../../types';
 import { formatCurrency } from '../../lib/finance';
 
 interface Props {

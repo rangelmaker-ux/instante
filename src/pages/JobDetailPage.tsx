@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Edit2, Trash2, Plus, DollarSign, User, Calendar,
-  MapPin, Link2, FileText, Users, Package, ExternalLink, CheckCircle2, Clock, X
+  Edit2, Trash2, Plus, User, Calendar,
+  MapPin, Link2, FileText, ExternalLink, CheckCircle2, Clock, X
 } from 'lucide-react';
 import { useJobStore } from '../store/jobStore';
 import { useClientStore } from '../store/clientStore';

@@ -1,6 +1,9 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
+import { useAuthStore } from './store/authStore';
 import BottomNav from './components/layout/BottomNav';
+import LoginPage       from './pages/LoginPage';
 import DashboardPage   from './pages/DashboardPage';
 import JobsPage        from './pages/JobsPage';
 import JobDetailPage   from './pages/JobDetailPage';
@@ -13,6 +16,20 @@ import EquipmentPage   from './pages/EquipmentPage';
 import InboxPage       from './pages/InboxPage';
 
 export default function App() {
+  const { session, initialized, initialize } = useAuthStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  if (!initialized) {
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Carregando...</div>;
+  }
+
+  if (!session) {
+    return <LoginPage />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -26,6 +43,7 @@ export default function App() {
         <Route path="/mais"              element={<><MaisPage          /><BottomNav /></>} />
         <Route path="/freelancers"       element={<><FreelancersPage   /><BottomNav /></>} />
         <Route path="/equipamentos"      element={<><EquipmentPage     /><BottomNav /></>} />
+        <Route path="*"                  element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

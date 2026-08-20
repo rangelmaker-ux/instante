@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, ChevronRight } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useJobStore } from '../store/jobStore';
 import { useClientStore } from '../store/clientStore';
 import { JOB_STATUS_LABELS, JOB_STATUS_COLORS, formatCurrency, formatShortDate, computeJobFinance } from '../lib/finance';
 import JobModal from '../components/modals/JobModal';
-import type { JobStatus } from '../types';
 
 const STATUS_FILTERS: { key: string; label: string }[] = [
   { key: 'all',         label: 'Todos' },

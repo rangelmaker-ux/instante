@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Edit2, Trash2, Phone, Mail, Briefcase, ChevronRight } from 'lucide-react';
+import { Edit2, Trash2, Phone, Mail, ChevronRight } from 'lucide-react';
 import { useClientStore } from '../store/clientStore';
 import { useJobStore } from '../store/jobStore';
 import { computeJobFinance, formatCurrency, formatDate, JOB_STATUS_LABELS, JOB_STATUS_COLORS } from '../lib/finance';

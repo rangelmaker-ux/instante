@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Phone, Mail, ChevronRight, Trash2, Edit2 } from 'lucide-react';
+import { Plus, Search, ChevronRight } from 'lucide-react';
 import { useClientStore } from '../store/clientStore';
 import { useJobStore } from '../store/jobStore';
 import ClientModal from '../components/modals/ClientModal';
@@ -9,12 +9,10 @@ import type { Client } from '../types';
 export default function ClientsPage() {
   const navigate = useNavigate();
   const clients = useClientStore((s) => s.clients);
-  const deleteClient = useClientStore((s) => s.deleteClient);
   const jobs = useJobStore((s) => s.jobs);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editClient, setEditClient] = useState<Client | undefined>();
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const filtered = clients
     .filter((c) => {

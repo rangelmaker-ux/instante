@@ -6,16 +6,17 @@ interface PageHeaderProps {
   title: string;
   back?: boolean;
   right?: ReactNode;
+  onBack?: () => void;
 }
 
-export default function PageHeader({ title, back, right }: PageHeaderProps) {
+export default function PageHeader({ title, back, right, onBack }: PageHeaderProps) {
   const navigate = useNavigate();
   return (
     <div className="page-header">
       {back && (
         <button
           className="btn-icon"
-          onClick={() => navigate(-1)}
+          onClick={() => onBack ? onBack() : navigate(-1)}
           aria-label="Voltar"
         >
           <ArrowLeft size={20} />

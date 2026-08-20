@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useJobStore } from '../store/jobStore';
 import { useClientStore } from '../store/clientStore';
 import { formatCurrency } from '../lib/finance';

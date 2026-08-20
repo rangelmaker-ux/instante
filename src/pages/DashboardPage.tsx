@@ -1,17 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  TrendingUp,
-  Clock,
-  CheckCircle2,
   AlertTriangle,
   Plus,
   ChevronRight,
-  DollarSign,
 } from 'lucide-react';
 import { useJobStore } from '../store/jobStore';
 import { useClientStore } from '../store/clientStore';
-import { computeJobFinance, formatCurrency, formatShortDate, JOB_STATUS_LABELS } from '../lib/finance';
+import { computeJobFinance, formatCurrency } from '../lib/finance';
 import JobModal from '../components/modals/JobModal';
 
 export default function DashboardPage() {

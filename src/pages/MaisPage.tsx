@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, Package, BarChart2, ChevronRight, UserPlus, Settings,
+  Users, Package, BarChart2, ChevronRight,
 } from 'lucide-react';
 import { useFreelancerStore, useEquipmentStore } from '../store/otherStores';
 import { useJobStore } from '../store/jobStore';

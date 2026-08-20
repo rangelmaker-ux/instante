@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, X, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, CheckCircle2 } from 'lucide-react';
 import { useEquipmentStore } from '../store/otherStores';
 import { useJobStore } from '../store/jobStore';
 import { useClientStore } from '../store/clientStore';

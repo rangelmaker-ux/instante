@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, CheckCircle2, Check, User, ArrowLeft } from 'lucide-react';
+import { Send, Check, User } from 'lucide-react';
 import { api } from '../lib/api';
 import PageHeader from '../components/layout/PageHeader';
-import { formatDate } from '../lib/finance';
 
 interface Conversation {
   id: string;
