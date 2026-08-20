@@ -51,7 +51,7 @@ export default function LoginPage() {
         flexDirection: 'column',
         alignItems: 'center'
       }}>
-        <img src="/logo.png" alt="Instante Comunicação" style={{ height: 48, objectFit: 'contain', marginBottom: 24 }} />
+        <img src="/logo.png" alt="Instante Comunicação" style={{ height: 120, objectFit: 'contain', marginBottom: 24, width: '100%' }} />
         <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: 24, color: 'var(--charcoal)' }}>
           {isSignUp ? 'Criar Conta' : 'Fazer Login'}
         </h1>
