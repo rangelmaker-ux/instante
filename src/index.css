@@ -88,6 +88,26 @@ p  { line-height: 1.6; }
   flex: 1;
   padding-bottom: calc(var(--nav-h) + 12px);
   overflow-y: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.page::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  max-width: 300px;
+  background-image: url('/logo.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.5;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .page-header {

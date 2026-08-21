@@ -1,0 +1,20 @@
+{
+  "name": "Instante Gestor",
+  "short_name": "Instante",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F6F3EF",
+  "theme_color": "#C17F3E",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
