@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import { useAuthStore } from './store/authStore';
+import { useClientStore } from './store/clientStore';
 import BottomNav from './components/layout/BottomNav';
 import LoginPage       from './pages/LoginPage';
 import DashboardPage   from './pages/DashboardPage';
@@ -17,10 +18,17 @@ import InboxPage       from './pages/InboxPage';
 
 export default function App() {
   const { session, initialized, initialize } = useAuthStore();
+  const fetchClients = useClientStore((s) => s.fetchClients);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  useEffect(() => {
+    if (session) {
+      fetchClients();
+    }
+  }, [session, fetchClients]);
 
   if (!initialized) {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Carregando...</div>;
