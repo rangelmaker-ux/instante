@@ -1,6 +1,16 @@
-import { db } from "../db/index.js";
 import { emit } from "./sseManager.js";
 import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+
+if (!supabaseUrl || !supabaseKey) {
+  console.warn("⚠️ Supabase URL or Key is missing in backend environment variables.");
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface WebhookPayload {
   event: string;
@@ -41,54 +51,96 @@ export async function processIncomingMessage(payload: WebhookPayload): Promise<v
   const phone = extractPhone(remoteJid);
   const pushName = payload.data.pushName ?? null;
 
-  // UPSERT Client
-  const clientQuery = db.prepare(`
-    INSERT INTO clients (id, whatsapp, name)
-    VALUES (@id, @whatsapp, @name)
-    ON CONFLICT (whatsapp) DO UPDATE SET name = excluded.name
-    RETURNING *
-  `);
-  
-  let client = db.prepare(`SELECT * FROM clients WHERE whatsapp = ?`).get(phone) as any;
-  if (!client) {
-    client = clientQuery.get({ id: crypto.randomUUID(), whatsapp: phone, name: pushName });
+  // 1. UPSERT Client
+  let client;
+  const { data: existingClient } = await supabase
+    .from('clients')
+    .select('*')
+    .eq('whatsapp', phone)
+    .single();
+
+  if (!existingClient) {
+    const { data: newClient, error: clientErr } = await supabase
+      .from('clients')
+      .insert([{ whatsapp: phone, name: pushName || phone }])
+      .select()
+      .single();
+    if (clientErr) console.error("Error inserting client:", clientErr);
+    client = newClient;
   } else {
-    clientQuery.get({ id: client.id, whatsapp: phone, name: pushName });
+    if (pushName && existingClient.name !== pushName) {
+      const { data: updatedClient } = await supabase
+        .from('clients')
+        .update({ name: pushName })
+        .eq('id', existingClient.id)
+        .select()
+        .single();
+      client = updatedClient;
+    } else {
+      client = existingClient;
+    }
   }
 
-  // UPSERT Conversation
-  const convQuery = db.prepare(`
-    INSERT INTO conversations (id, client_id, whatsapp_chat_id, last_message_at)
-    VALUES (@id, @client_id, @whatsapp_chat_id, datetime('now'))
-    ON CONFLICT (whatsapp_chat_id) DO UPDATE SET last_message_at = datetime('now'), unread_count = unread_count + 1
-    RETURNING *
-  `);
+  if (!client) return;
 
-  let conversation = db.prepare(`SELECT * FROM conversations WHERE whatsapp_chat_id = ?`).get(remoteJid) as any;
-  if (!conversation) {
-    conversation = convQuery.get({ id: crypto.randomUUID(), client_id: client.id, whatsapp_chat_id: remoteJid });
+  // 2. UPSERT Conversation
+  let conversation;
+  const { data: existingConv } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('whatsapp_chat_id', remoteJid)
+    .single();
+
+  if (!existingConv) {
+    const { data: newConv, error: convErr } = await supabase
+      .from('conversations')
+      .insert([{ client_id: client.id, whatsapp_chat_id: remoteJid, unread_count: 1 }])
+      .select()
+      .single();
+    if (convErr) console.error("Error inserting conversation:", convErr);
+    conversation = newConv;
   } else {
-    conversation = convQuery.get({ id: conversation.id, client_id: client.id, whatsapp_chat_id: remoteJid });
+    const { data: updatedConv, error: updateErr } = await supabase
+      .from('conversations')
+      .update({ 
+        last_message_at: new Date().toISOString(),
+        unread_count: existingConv.unread_count + 1 
+      })
+      .eq('id', existingConv.id)
+      .select()
+      .single();
+    if (updateErr) console.error("Error updating conversation:", updateErr);
+    conversation = updatedConv;
   }
 
-  // INSERT Message
-  const msgExists = db.prepare(`SELECT id FROM messages WHERE whatsapp_message_id = ?`).get(whatsappMessageId);
-  if (msgExists) return;
+  if (!conversation) return;
 
-  const msgQuery = db.prepare(`
-    INSERT INTO messages (id, conversation_id, whatsapp_message_id, content, direction)
-    VALUES (@id, @conversation_id, @whatsapp_message_id, @content, 'in')
-    RETURNING *
-  `);
+  // 3. INSERT Message
+  const { data: existingMsg } = await supabase
+    .from('messages')
+    .select('id')
+    .eq('whatsapp_message_id', whatsappMessageId)
+    .single();
 
-  const message = msgQuery.get({
-    id: crypto.randomUUID(),
-    conversation_id: conversation.id,
-    whatsapp_message_id: whatsappMessageId,
-    content
-  }) as any;
+  if (existingMsg) return; // Already processed
 
-  // Emit SSE
+  const { data: message, error: msgErr } = await supabase
+    .from('messages')
+    .insert([{
+      conversation_id: conversation.id,
+      whatsapp_message_id: whatsappMessageId,
+      content,
+      direction: 'in'
+    }])
+    .select()
+    .single();
+
+  if (msgErr || !message) {
+    console.error("Error inserting message:", msgErr);
+    return;
+  }
+
+  // 4. Emit SSE
   emit("new_message", {
     conversation_id: conversation.id,
     message: {
