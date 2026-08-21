@@ -75,10 +75,6 @@ export default function GoalsPage() {
                     <p className="text-xs text-muted">Meta Faturamento</p>
                     <p className="font-semibold text-copper">{formatCurrency(g.targetRevenue)}</p>
                   </div>
-                  <div className="split-values" style={{ textAlign: 'right' }}>
-                    <p className="text-xs text-muted">Casamentos</p>
-                    <p className="font-semibold">{g.targetWeddings} projetos</p>
-                  </div>
                 </div>
               </div>
             ))}
@@ -92,28 +88,27 @@ export default function GoalsPage() {
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2 className="modal-title">{editGoal ? 'Editar Meta' : 'Nova Meta'}</h2>
+          <div className="modal-sheet animate-in" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-drag" />
+            <div className="flex items-center justify-between" style={{ marginBottom: 18 }}>
+              <h2 className="modal-title" style={{ marginBottom: 0 }}>
+                {editGoal ? 'Editar Meta' : 'Nova Meta'}
+              </h2>
             </div>
-            <form onSubmit={handleSubmit} className="modal-content">
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div className="form-group">
-                <label>Mês</label>
-                <input type="number" min={1} max={12} value={month} onChange={(e) => setMonth(parseInt(e.target.value))} required />
+                <label className="form-label">Mês</label>
+                <input className="form-input" type="number" min={1} max={12} value={month} onChange={(e) => setMonth(parseInt(e.target.value))} required />
               </div>
               <div className="form-group">
-                <label>Ano</label>
-                <input type="number" min={2020} value={year} onChange={(e) => setYear(parseInt(e.target.value))} required />
+                <label className="form-label">Ano</label>
+                <input className="form-input" type="number" min={2020} value={year} onChange={(e) => setYear(parseInt(e.target.value))} required />
               </div>
               <div className="form-group">
-                <label>Meta de Faturamento (R$)</label>
-                <input type="number" step="0.01" value={revenue} onChange={(e) => setRevenue(e.target.value)} required />
+                <label className="form-label">Meta de Faturamento (R$)</label>
+                <input className="form-input" type="number" step="0.01" value={revenue} onChange={(e) => setRevenue(e.target.value)} required />
               </div>
-              <div className="form-group">
-                <label>Meta de Casamentos (Qtd)</label>
-                <input type="number" value={weddings} onChange={(e) => setWeddings(e.target.value)} required />
-              </div>
-              <div style={{ marginTop: 24 }}>
+              <div style={{ marginTop: 10 }}>
                 <button type="submit" className="btn btn-primary w-full">Salvar Meta</button>
               </div>
             </form>

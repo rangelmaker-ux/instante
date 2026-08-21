@@ -144,23 +144,6 @@ export default function MaisPage() {
               </ResponsiveContainer>
             </div>
           </div>
-
-          <div className="section animate-in" style={{ animationDelay: '0.05s' }}>
-            <p className="section-title">Projetos vs Meta</p>
-            <div style={{ width: '100%', height: 250 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--charcoal-light)' }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--charcoal-light)' }} />
-                  <Tooltip cursor={{ fill: 'var(--bg-2)' }} />
-                  <Legend iconType="circle" wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="MetaProjetos" name="Meta" stroke="var(--charcoal-light)" strokeWidth={2} dot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="Projetos" name="Realizado" stroke="var(--success)" strokeWidth={3} dot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
         </div>
 
         {/* SOCIOS & CAIXA */}

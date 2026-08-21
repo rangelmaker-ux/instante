@@ -126,35 +126,38 @@ export default function ProductionPage() {
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-sheet" onClick={(e) => e.stopPropagation()} style={{ overflowY: 'auto' }}>
-            <div className="modal-header">
-              <h2 className="modal-title">{editProd ? 'Editar Produção' : 'Novo Vídeo'}</h2>
-              {editProd && (
-                <button className="btn btn-ghost" onClick={handleDelete}>
-                  <Trash size={18} color="var(--danger)" />
-                </button>
-              )}
+          <div className="modal-sheet animate-in" onClick={(e) => e.stopPropagation()} style={{ overflowY: 'auto' }}>
+            <div className="modal-drag" />
+            <div className="flex items-center justify-between" style={{ marginBottom: 18 }}>
+              <h2 className="modal-title" style={{ marginBottom: 0 }}>{editProd ? 'Editar Produção' : 'Novo Vídeo'}</h2>
+              <div className="flex gap-2">
+                {editProd && (
+                  <button className="btn-icon" onClick={handleDelete} style={{ color: 'var(--danger)' }}>
+                    <Trash size={18} />
+                  </button>
+                )}
+              </div>
             </div>
-            <form onSubmit={handleSubmit} className="modal-content">
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div className="form-group">
-                <label>Título / Assunto</label>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+                <label className="form-label">Título / Assunto</label>
+                <input className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
               
               <div className="split-row" style={{ padding: 0, gap: 12 }}>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>Data Gravação</label>
-                  <input type="date" value={recordingDate} onChange={(e) => setRecordingDate(e.target.value)} />
+                  <label className="form-label">Data Gravação</label>
+                  <input className="form-input" type="date" value={recordingDate} onChange={(e) => setRecordingDate(e.target.value)} />
                 </div>
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label>Horário</label>
-                  <input type="time" value={recordingTime} onChange={(e) => setRecordingTime(e.target.value)} />
+                  <label className="form-label">Horário</label>
+                  <input className="form-input" type="time" value={recordingTime} onChange={(e) => setRecordingTime(e.target.value)} />
                 </div>
               </div>
 
               <div className="form-group">
-                <label>Status</label>
-                <select value={status} onChange={(e) => setStatus(e.target.value as any)}>
+                <label className="form-label">Status</label>
+                <select className="form-input" value={status} onChange={(e) => setStatus(e.target.value as any)}>
                   <option value="planned">Planejado</option>
                   <option value="recorded">Gravado</option>
                   <option value="edited">Editado</option>
@@ -163,8 +166,9 @@ export default function ProductionPage() {
               </div>
 
               <div className="form-group">
-                <label>Roteiro / Script</label>
+                <label className="form-label">Roteiro / Script</label>
                 <textarea
+                  className="form-input"
                   value={script}
                   onChange={(e) => setScript(e.target.value)}
                   rows={6}
@@ -172,7 +176,7 @@ export default function ProductionPage() {
                 />
               </div>
               
-              <div style={{ marginTop: 24 }}>
+              <div style={{ marginTop: 10 }}>
                 <button type="submit" className="btn btn-primary w-full">Salvar Produção</button>
               </div>
             </form>
