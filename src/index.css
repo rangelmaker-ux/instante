@@ -460,6 +460,7 @@ textarea.form-input {
   align-items: flex-end;
   z-index: 500;
   animation: fadeIn 0.18s ease;
+  overscroll-behavior: none;
 }
 
 .modal-sheet {
@@ -472,6 +473,8 @@ textarea.form-input {
   animation: slideUp 0.22s ease;
   max-height: 92svh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-drag {
