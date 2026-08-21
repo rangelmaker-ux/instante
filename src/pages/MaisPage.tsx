@@ -9,7 +9,7 @@ import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, Legend
+  Legend
 } from 'recharts';
 
 export default function MaisPage() {
