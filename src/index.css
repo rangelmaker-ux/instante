@@ -704,3 +704,72 @@ textarea.form-input {
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .min-w-0 { min-width: 0; }
 .rounded-full { border-radius: 999px; }
+
+/* ─── DESKTOP RESPONSIVE ───────────────────────────────── */
+@media (min-width: 768px) {
+  #root {
+    max-width: 100%;
+    flex-direction: row;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 220px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 24px;
+    border-top: none;
+    border-right: 1px solid var(--border-light);
+    transform: none;
+  }
+
+  .nav-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 16px 24px;
+    width: 100%;
+    gap: 12px;
+    flex: none;
+  }
+
+  .nav-label {
+    font-size: 0.95rem;
+  }
+
+  .page {
+    padding-bottom: 0;
+    margin-left: 220px;
+    width: calc(100% - 220px);
+  }
+
+  .fab {
+    bottom: 32px;
+    right: 32px;
+    max-width: none;
+  }
+
+  .modal-overlay {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-sheet {
+    max-width: 520px;
+    border-radius: var(--radius-xl);
+    max-height: 85svh;
+  }
+
+  .modal-drag {
+    display: none;
+  }
+
+  .desktop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+}

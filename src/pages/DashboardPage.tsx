@@ -114,7 +114,8 @@ export default function DashboardPage() {
         {upcoming.length > 0 && (
           <div className="section animate-in" style={{ animationDelay: '0.08s' }}>
             <p className="section-title">Próximos serviços</p>
-            {upcoming.map((job) => {
+            <div className="desktop-grid flex flex-col gap-3">
+              {upcoming.map((job) => {
               const client = clients.find((c) => c.id === job.clientId);
               return (
                 <div
@@ -151,6 +152,7 @@ export default function DashboardPage() {
                 </div>
               );
             })}
+            </div>
           </div>
         )}
 

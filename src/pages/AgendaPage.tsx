@@ -183,6 +183,7 @@ export default function AgendaPage() {
             <p className="section-title">
               {String(selectedDay).padStart(2, '0')} de {MONTHS[month]}
             </p>
+            <div className="desktop-grid flex flex-col gap-3">
             {selectedEvents.length === 0 ? (
               <p className="text-sm text-muted">Nenhum evento neste dia.</p>
             ) : (
@@ -214,6 +215,7 @@ export default function AgendaPage() {
                 </div>
               ))
             )}
+            </div>
           </div>
         )}
       </div>

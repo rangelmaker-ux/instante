@@ -53,11 +53,12 @@ export default function ClientsPage() {
             )}
           </div>
         ) : (
-          filtered.map((client) => {
-            const jobCount = getJobCount(client.id);
-            return (
-              <div
-                key={client.id}
+          <div className="desktop-grid flex flex-col gap-3">
+            {filtered.map((client) => {
+              const jobCount = getJobCount(client.id);
+              return (
+                <div
+                  key={client.id}
                 className="card animate-in"
                 onClick={() => navigate(`/clientes/${client.id}`)}
               >
@@ -93,7 +94,8 @@ export default function ClientsPage() {
                 </div>
               </div>
             );
-          })
+          })}
+          </div>
         )}
       </div>
 

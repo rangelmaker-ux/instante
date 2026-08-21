@@ -78,12 +78,13 @@ export default function JobsPage() {
             )}
           </div>
         ) : (
-          filtered.map((job) => {
-            const client = clients.find((c) => c.id === job.clientId);
-            const summary = computeJobFinance(job, payments, jobFreelancers);
-            const pct = job.totalValue > 0 ? (summary.totalPaid / job.totalValue) * 100 : 0;
+          <div className="desktop-grid flex flex-col gap-3">
+            {filtered.map((job) => {
+              const client = clients.find((c) => c.id === job.clientId);
+              const summary = computeJobFinance(job, payments, jobFreelancers);
+              const pct = job.totalValue > 0 ? (summary.totalPaid / job.totalValue) * 100 : 0;
 
-            return (
+              return (
               <div
                 key={job.id}
                 className="card animate-in"
@@ -126,7 +127,8 @@ export default function JobsPage() {
                 </div>
               </div>
             );
-          })
+          })}
+          </div>
         )}
       </div>
 
