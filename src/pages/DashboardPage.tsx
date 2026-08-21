@@ -187,9 +187,6 @@ export default function DashboardPage() {
         {/* EMPTY */}
         {jobs.length === 0 && (
           <div className="empty-state animate-in" style={{ paddingTop: 32 }}>
-            <div style={{ marginBottom: 16 }}>
-              <img src="/logo.png" alt="Instante Comunicação" style={{ height: 60, objectFit: 'contain' }} />
-            </div>
             <p className="text-sm text-muted" style={{ marginTop: 2 }}>Nenhum projeto cadastrado ainda.</p>
             <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => setShowNewJob(true)}>
               <Plus size={16} /> Novo projeto

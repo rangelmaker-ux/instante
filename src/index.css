@@ -95,17 +95,15 @@ p  { line-height: 1.6; }
 .page::before {
   content: "";
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  height: 90%;
-  max-width: 350px;
+  bottom: -30px;
+  right: -30px;
+  width: 250px;
+  height: 250px;
   background-image: url('/logo.png');
-  background-position: center;
+  background-position: bottom right;
   background-repeat: no-repeat;
   background-size: contain;
-  opacity: 0.08;
+  opacity: 0.5;
   z-index: 0;
   pointer-events: none;
 }
