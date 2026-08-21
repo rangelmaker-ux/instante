@@ -177,16 +177,38 @@ export const useJobStore = create<JobStore>((set, get) => ({
   },
 
   addJob: async (data) => {
-    const { data: newRow, error } = await supabase.from('jobs').insert([mapJobToDB(data)]).select().single();
-    if (!error && newRow) {
-      const parsed = mapJobFromDB(newRow);
-      set((s) => ({ jobs: [...s.jobs, parsed] }));
-      return parsed.id;
+    const tempId = crypto.randomUUID();
+    const tempJob: Job = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
+    set((s) => ({ jobs: [...s.jobs, tempJob] }));
+
+    try {
+      const { data: newRow, error } = await supabase.from('jobs').insert([mapJobToDB(data)]).select().single();
+      if (error) {
+        console.error('Supabase addJob error:', error);
+      } else if (newRow) {
+        const parsed = mapJobFromDB(newRow);
+        set((s) => ({ jobs: s.jobs.map((j) => (j.id === tempId ? parsed : j)) }));
+        return parsed.id;
+      }
+    } catch (e) {
+      console.error('Network error addJob:', e);
     }
+    return tempId;
   },
   updateJob: async (id, data) => {
     set((s) => ({ jobs: s.jobs.map((j) => (j.id === id ? { ...j, ...data } : j)) }));
-    await supabase.from('jobs').update(mapJobToDB(data)).eq('id', id);
+    try {
+      const { error } = await supabase.from('jobs').update(mapJobToDB(data)).eq('id', id);
+      if (error) console.error('Supabase updateJob error:', error);
+    } catch (e) {
+      console.error('Network error updateJob:', e);
+    }
   },
   deleteJob: async (id) => {
     set((s) => ({
@@ -196,59 +218,149 @@ export const useJobStore = create<JobStore>((set, get) => ({
       deliveries: s.deliveries.filter((d) => d.jobId !== id),
       jobFreelancers: s.jobFreelancers.filter((jf) => jf.jobId !== id),
     }));
-    await supabase.from('jobs').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('jobs').delete().eq('id', id);
+      if (error) console.error('Supabase deleteJob error:', error);
+    } catch (e) {
+      console.error('Network error deleteJob:', e);
+    }
   },
   getJob: (id) => get().jobs.find((j) => j.id === id),
 
   addPayment: async (data) => {
-    const { data: newRow, error } = await supabase.from('payments').insert([mapPaymentToDB(data)]).select().single();
-    if (!error && newRow) {
-      set((s) => ({ payments: [...s.payments, mapPaymentFromDB(newRow)] }));
+    const tempId = crypto.randomUUID();
+    const tempPayment: Payment = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+    };
+
+    set((s) => ({ payments: [...s.payments, tempPayment] }));
+
+    try {
+      const { data: newRow, error } = await supabase.from('payments').insert([mapPaymentToDB(data)]).select().single();
+      if (error) {
+        console.error('Supabase addPayment error:', error);
+      } else if (newRow) {
+        set((s) => ({ payments: s.payments.map((p) => (p.id === tempId ? mapPaymentFromDB(newRow) : p)) }));
+      }
+    } catch (e) {
+      console.error('Network error addPayment:', e);
     }
   },
   deletePayment: async (id) => {
     set((s) => ({ payments: s.payments.filter((p) => p.id !== id) }));
-    await supabase.from('payments').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('payments').delete().eq('id', id);
+      if (error) console.error('Supabase deletePayment error:', error);
+    } catch (e) {
+      console.error('Network error deletePayment:', e);
+    }
   },
   getPaymentsForJob: (jobId) => get().payments.filter((p) => p.jobId === jobId),
 
   addContract: async (data) => {
-    const { data: newRow, error } = await supabase.from('contracts').insert([mapContractToDB(data)]).select().single();
-    if (!error && newRow) {
-      set((s) => ({ contracts: [...s.contracts, mapContractFromDB(newRow)] }));
+    const tempId = crypto.randomUUID();
+    const tempContract: Contract = {
+      ...data,
+      id: tempId,
+      uploadedAt: new Date().toISOString(),
+    };
+
+    set((s) => ({ contracts: [...s.contracts, tempContract] }));
+
+    try {
+      const { data: newRow, error } = await supabase.from('contracts').insert([mapContractToDB(data)]).select().single();
+      if (error) {
+        console.error('Supabase addContract error:', error);
+      } else if (newRow) {
+        set((s) => ({ contracts: s.contracts.map((c) => (c.id === tempId ? mapContractFromDB(newRow) : c)) }));
+      }
+    } catch (e) {
+      console.error('Network error addContract:', e);
     }
   },
   deleteContract: async (id) => {
     set((s) => ({ contracts: s.contracts.filter((c) => c.id !== id) }));
-    await supabase.from('contracts').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('contracts').delete().eq('id', id);
+      if (error) console.error('Supabase deleteContract error:', error);
+    } catch (e) {
+      console.error('Network error deleteContract:', e);
+    }
   },
 
   addDelivery: async (data) => {
-    const { data: newRow, error } = await supabase.from('deliveries').insert([mapDeliveryToDB(data)]).select().single();
-    if (!error && newRow) {
-      set((s) => ({ deliveries: [...s.deliveries, mapDeliveryFromDB(newRow)] }));
+    const tempId = crypto.randomUUID();
+    const tempDelivery: Delivery = {
+      ...data,
+      id: tempId,
+      deliveredAt: new Date().toISOString(),
+    };
+
+    set((s) => ({ deliveries: [...s.deliveries, tempDelivery] }));
+
+    try {
+      const { data: newRow, error } = await supabase.from('deliveries').insert([mapDeliveryToDB(data)]).select().single();
+      if (error) {
+        console.error('Supabase addDelivery error:', error);
+      } else if (newRow) {
+        set((s) => ({ deliveries: s.deliveries.map((d) => (d.id === tempId ? mapDeliveryFromDB(newRow) : d)) }));
+      }
+    } catch (e) {
+      console.error('Network error addDelivery:', e);
     }
   },
   deleteDelivery: async (id) => {
     set((s) => ({ deliveries: s.deliveries.filter((d) => d.id !== id) }));
-    await supabase.from('deliveries').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('deliveries').delete().eq('id', id);
+      if (error) console.error('Supabase deleteDelivery error:', error);
+    } catch (e) {
+      console.error('Network error deleteDelivery:', e);
+    }
   },
 
   addJobFreelancer: async (data) => {
-    const { data: newRow, error } = await supabase.from('job_freelancers').insert([mapJFToDB(data)]).select().single();
-    if (!error && newRow) {
-      set((s) => ({ jobFreelancers: [...s.jobFreelancers, mapJFFromDB(newRow)] }));
+    const tempId = crypto.randomUUID();
+    const tempJF: JobFreelancer = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+    };
+
+    set((s) => ({ jobFreelancers: [...s.jobFreelancers, tempJF] }));
+
+    try {
+      const { data: newRow, error } = await supabase.from('job_freelancers').insert([mapJFToDB(data)]).select().single();
+      if (error) {
+        console.error('Supabase addJobFreelancer error:', error);
+      } else if (newRow) {
+        set((s) => ({ jobFreelancers: s.jobFreelancers.map((jf) => (jf.id === tempId ? mapJFFromDB(newRow) : jf)) }));
+      }
+    } catch (e) {
+      console.error('Network error addJobFreelancer:', e);
     }
   },
   updateJobFreelancer: async (id, data) => {
     set((s) => ({
       jobFreelancers: s.jobFreelancers.map((jf) => (jf.id === id ? { ...jf, ...data } : jf)),
     }));
-    await supabase.from('job_freelancers').update(mapJFToDB(data)).eq('id', id);
+    try {
+      const { error } = await supabase.from('job_freelancers').update(mapJFToDB(data)).eq('id', id);
+      if (error) console.error('Supabase updateJobFreelancer error:', error);
+    } catch (e) {
+      console.error('Network error updateJobFreelancer:', e);
+    }
   },
   deleteJobFreelancer: async (id) => {
     set((s) => ({ jobFreelancers: s.jobFreelancers.filter((jf) => jf.id !== id) }));
-    await supabase.from('job_freelancers').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('job_freelancers').delete().eq('id', id);
+      if (error) console.error('Supabase deleteJobFreelancer error:', error);
+    } catch (e) {
+      console.error('Network error deleteJobFreelancer:', e);
+    }
   },
   getJobFreelancers: (jobId) => get().jobFreelancers.filter((jf) => jf.jobId === jobId),
 }));

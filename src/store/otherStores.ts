@@ -72,26 +72,62 @@ export const useFreelancerStore = create<FreelancerStore>((set, get) => ({
 
   fetchFreelancers: async () => {
     set({ loading: true });
-    const { data, error } = await supabase.from('freelancers').select('*').order('name');
-    if (!error && data) {
-      set({ freelancers: data.map(mapFreelancerFromDB), loading: false });
-    } else {
+    try {
+      const { data, error } = await supabase.from('freelancers').select('*').order('name');
+      if (error) console.error('Supabase fetchFreelancers error:', error);
+      if (data) {
+        set({ freelancers: data.map(mapFreelancerFromDB), loading: false });
+      } else {
+        set({ loading: false });
+      }
+    } catch (e) {
+      console.error('Network error fetchFreelancers:', e);
       set({ loading: false });
     }
   },
   addFreelancer: async (data) => {
-    const { data: newRow, error } = await supabase.from('freelancers').insert([mapFreelancerToDB(data)]).select().single();
-    if (!error && newRow) {
-      set((s) => ({ freelancers: [...s.freelancers, mapFreelancerFromDB(newRow)].sort((a, b) => a.name.localeCompare(b.name)) }));
+    const tempId = crypto.randomUUID();
+    const tempFreelancer: Freelancer = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
+    set((s) => ({ freelancers: [...s.freelancers, tempFreelancer].sort((a, b) => a.name.localeCompare(b.name)) }));
+
+    try {
+      const { data: newRow, error } = await supabase.from('freelancers').insert([mapFreelancerToDB(data)]).select().single();
+      if (error) {
+        console.error('Supabase addFreelancer error:', error);
+      } else if (newRow) {
+        set((s) => ({
+          freelancers: s.freelancers
+            .map((f) => (f.id === tempId ? mapFreelancerFromDB(newRow) : f))
+            .sort((a, b) => a.name.localeCompare(b.name)),
+        }));
+      }
+    } catch (e) {
+      console.error('Network error addFreelancer:', e);
     }
   },
   updateFreelancer: async (id, data) => {
     set((s) => ({ freelancers: s.freelancers.map((f) => (f.id === id ? { ...f, ...data } : f)) }));
-    await supabase.from('freelancers').update(mapFreelancerToDB(data)).eq('id', id);
+    try {
+      const { error } = await supabase.from('freelancers').update(mapFreelancerToDB(data)).eq('id', id);
+      if (error) console.error('Supabase updateFreelancer error:', error);
+    } catch (e) {
+      console.error('Network error updateFreelancer:', e);
+    }
   },
   deleteFreelancer: async (id) => {
     set((s) => ({ freelancers: s.freelancers.filter((f) => f.id !== id) }));
-    await supabase.from('freelancers').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('freelancers').delete().eq('id', id);
+      if (error) console.error('Supabase deleteFreelancer error:', error);
+    } catch (e) {
+      console.error('Network error deleteFreelancer:', e);
+    }
   },
   getFreelancer: (id) => get().freelancers.find((f) => f.id === id),
 }));
@@ -102,25 +138,57 @@ export const useEquipmentStore = create<EquipmentStore>((set) => ({
 
   fetchRentals: async () => {
     set({ loading: true });
-    const { data, error } = await supabase.from('equipment_rentals').select('*');
-    if (!error && data) {
-      set({ rentals: data.map(mapRentalFromDB), loading: false });
-    } else {
+    try {
+      const { data, error } = await supabase.from('equipment_rentals').select('*');
+      if (error) console.error('Supabase fetchRentals error:', error);
+      if (data) {
+        set({ rentals: data.map(mapRentalFromDB), loading: false });
+      } else {
+        set({ loading: false });
+      }
+    } catch (e) {
+      console.error('Network error fetchRentals:', e);
       set({ loading: false });
     }
   },
   addRental: async (data) => {
-    const { data: newRow, error } = await supabase.from('equipment_rentals').insert([mapRentalToDB(data)]).select().single();
-    if (!error && newRow) {
-      set((s) => ({ rentals: [...s.rentals, mapRentalFromDB(newRow)] }));
+    const tempId = crypto.randomUUID();
+    const tempRental: EquipmentRental = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
+    set((s) => ({ rentals: [...s.rentals, tempRental] }));
+
+    try {
+      const { data: newRow, error } = await supabase.from('equipment_rentals').insert([mapRentalToDB(data)]).select().single();
+      if (error) {
+        console.error('Supabase addRental error:', error);
+      } else if (newRow) {
+        set((s) => ({ rentals: s.rentals.map((r) => (r.id === tempId ? mapRentalFromDB(newRow) : r)) }));
+      }
+    } catch (e) {
+      console.error('Network error addRental:', e);
     }
   },
   updateRental: async (id, data) => {
     set((s) => ({ rentals: s.rentals.map((r) => (r.id === id ? { ...r, ...data } : r)) }));
-    await supabase.from('equipment_rentals').update(mapRentalToDB(data)).eq('id', id);
+    try {
+      const { error } = await supabase.from('equipment_rentals').update(mapRentalToDB(data)).eq('id', id);
+      if (error) console.error('Supabase updateRental error:', error);
+    } catch (e) {
+      console.error('Network error updateRental:', e);
+    }
   },
   deleteRental: async (id) => {
     set((s) => ({ rentals: s.rentals.filter((r) => r.id !== id) }));
-    await supabase.from('equipment_rentals').delete().eq('id', id);
+    try {
+      const { error } = await supabase.from('equipment_rentals').delete().eq('id', id);
+      if (error) console.error('Supabase deleteRental error:', error);
+    } catch (e) {
+      console.error('Network error deleteRental:', e);
+    }
   },
 }));

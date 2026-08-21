@@ -46,45 +46,101 @@ export const useCRMStore = create<CRMStore>((set) => ({
   },
   
   addGoal: async (data) => {
-    const payload = {
-      month: data.month, year: data.year,
-      target_revenue: data.targetRevenue, target_weddings: data.targetWeddings
+    const tempId = crypto.randomUUID();
+    const tempGoal: Goal = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
     };
-    const { data: newGoal } = await supabase.from('goals').insert([payload]).select().single();
-    if (newGoal) {
-      set(s => ({ goals: [{ ...data, id: newGoal.id, createdAt: newGoal.created_at }, ...s.goals] }));
+
+    // Optimistic update
+    set((s) => ({ goals: [tempGoal, ...s.goals] }));
+
+    try {
+      const payload = {
+        month: data.month,
+        year: data.year,
+        target_revenue: data.targetRevenue,
+        target_weddings: data.targetWeddings,
+      };
+      const { data: newGoal, error } = await supabase.from('goals').insert([payload]).select().single();
+      if (error) {
+        console.error('Supabase addGoal error:', error);
+      } else if (newGoal) {
+        set((s) => ({
+          goals: s.goals.map((g) => (g.id === tempId ? { ...data, id: newGoal.id, createdAt: newGoal.created_at } : g)),
+        }));
+      }
+    } catch (e) {
+      console.error('Network error addGoal:', e);
     }
   },
   updateGoal: async (id, data) => {
-    set(s => ({ goals: s.goals.map(g => g.id === id ? { ...g, ...data } : g) }));
-    const payload: any = {};
-    if (data.month !== undefined) payload.month = data.month;
-    if (data.year !== undefined) payload.year = data.year;
-    if (data.targetRevenue !== undefined) payload.target_revenue = data.targetRevenue;
-    if (data.targetWeddings !== undefined) payload.target_weddings = data.targetWeddings;
-    await supabase.from('goals').update(payload).eq('id', id);
+    set((s) => ({ goals: s.goals.map((g) => (g.id === id ? { ...g, ...data } : g)) }));
+    try {
+      const payload: any = {};
+      if (data.month !== undefined) payload.month = data.month;
+      if (data.year !== undefined) payload.year = data.year;
+      if (data.targetRevenue !== undefined) payload.target_revenue = data.targetRevenue;
+      if (data.targetWeddings !== undefined) payload.target_weddings = data.targetWeddings;
+      const { error } = await supabase.from('goals').update(payload).eq('id', id);
+      if (error) console.error('Supabase updateGoal error:', error);
+    } catch (e) {
+      console.error('Network error updateGoal:', e);
+    }
   },
   
   addProduction: async (data) => {
-    const payload = {
-      title: data.title, description: data.description,
-      recording_date: data.recordingDate, recording_time: data.recordingTime,
-      script: data.script, status: data.status
+    const tempId = crypto.randomUUID();
+    const tempProd: PersonalProduction = {
+      ...data,
+      id: tempId,
+      createdAt: new Date().toISOString(),
     };
-    const { data: newProd } = await supabase.from('personal_production').insert([payload]).select().single();
-    if (newProd) {
-      set(s => ({ productions: [...s.productions, { ...data, id: newProd.id, createdAt: newProd.created_at }] }));
+
+    // Optimistic update
+    set((s) => ({ productions: [...s.productions, tempProd] }));
+
+    try {
+      const payload = {
+        title: data.title,
+        description: data.description || null,
+        recording_date: data.recordingDate || null,
+        recording_time: data.recordingTime || null,
+        script: data.script || null,
+        status: data.status,
+      };
+      const { data: newProd, error } = await supabase.from('personal_production').insert([payload]).select().single();
+      if (error) {
+        console.error('Supabase addProduction error:', error);
+      } else if (newProd) {
+        set((s) => ({
+          productions: s.productions.map((p) => (p.id === tempId ? { ...data, id: newProd.id, createdAt: newProd.created_at } : p)),
+        }));
+      }
+    } catch (e) {
+      console.error('Network error addProduction:', e);
     }
   },
   updateProduction: async (id, data) => {
-    set(s => ({ productions: s.productions.map(p => p.id === id ? { ...p, ...data } : p) }));
-    const payload: any = { ...data };
-    if (data.recordingDate !== undefined) { payload.recording_date = data.recordingDate; delete payload.recordingDate; }
-    if (data.recordingTime !== undefined) { payload.recording_time = data.recordingTime; delete payload.recordingTime; }
-    await supabase.from('personal_production').update(payload).eq('id', id);
+    set((s) => ({ productions: s.productions.map((p) => (p.id === id ? { ...p, ...data } : p)) }));
+    try {
+      const payload: any = { ...data };
+      if (data.recordingDate !== undefined) { payload.recording_date = data.recordingDate; delete payload.recordingDate; }
+      if (data.recordingTime !== undefined) { payload.recording_time = data.recordingTime; delete payload.recordingTime; }
+      const { error } = await supabase.from('personal_production').update(payload).eq('id', id);
+      if (error) console.error('Supabase updateProduction error:', error);
+    } catch (e) {
+      console.error('Network error updateProduction:', e);
+    }
   },
   deleteProduction: async (id) => {
-    set(s => ({ productions: s.productions.filter(p => p.id !== id) }));
-    await supabase.from('personal_production').delete().eq('id', id);
+    set((s) => ({ productions: s.productions.filter((p) => p.id !== id) }));
+    try {
+      const { error } = await supabase.from('personal_production').delete().eq('id', id);
+      if (error) console.error('Supabase deleteProduction error:', error);
+    } catch (e) {
+      console.error('Network error deleteProduction:', e);
+    }
   }
 }));
