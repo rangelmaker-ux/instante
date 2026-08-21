@@ -6,7 +6,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -14,15 +13,8 @@ export default function LoginPage() {
     setError('');
 
     try {
-      if (isSignUp) {
-        const { error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) throw signUpError;
-        alert('Cadastro realizado! Verifique seu email ou tente fazer login diretamente (se não houver confirmação obrigatória).');
-        setIsSignUp(false);
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) throw signInError;
-      }
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
     } catch (err: any) {
       setError(err.message || 'Erro ao autenticar');
     } finally {
@@ -53,7 +45,7 @@ export default function LoginPage() {
       }}>
         <img src="/logo.png" alt="Instante Comunicação" style={{ height: 120, objectFit: 'contain', marginBottom: 24, width: '100%' }} />
         <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: 24, color: 'var(--charcoal)' }}>
-          {isSignUp ? 'Criar Conta' : 'Fazer Login'}
+          Fazer Login
         </h1>
 
         {error && (
@@ -85,16 +77,9 @@ export default function LoginPage() {
           </div>
 
           <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: 8 }}>
-            {loading ? 'Aguarde...' : (isSignUp ? 'Cadastrar' : 'Entrar')}
+            {loading ? 'Aguarde...' : 'Entrar'}
           </button>
         </form>
-
-        <button 
-          onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
-          style={{ marginTop: 24, background: 'none', border: 'none', color: 'var(--copper)', fontWeight: 'bold', cursor: 'pointer' }}
-        >
-          {isSignUp ? 'Já tenho uma conta. Fazer login.' : 'Não tenho conta. Criar agora.'}
-        </button>
       </div>
     </div>
   );
