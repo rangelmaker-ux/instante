@@ -13,7 +13,6 @@ export default function GoalsPage() {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
   const [revenue, setRevenue] = useState('');
-  const [weddings, setWeddings] = useState('');
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,13 +20,13 @@ export default function GoalsPage() {
       await updateGoal(editGoal.id, {
         month, year,
         targetRevenue: parseFloat(revenue) || 0,
-        targetWeddings: parseInt(weddings) || 0
+        targetWeddings: 0
       });
     } else {
       await addGoal({
         month, year,
         targetRevenue: parseFloat(revenue) || 0,
-        targetWeddings: parseInt(weddings) || 0
+        targetWeddings: 0
       });
     }
     setShowModal(false);
@@ -38,7 +37,6 @@ export default function GoalsPage() {
     setMonth(g.month);
     setYear(g.year);
     setRevenue(g.targetRevenue.toString());
-    setWeddings(g.targetWeddings.toString());
     setShowModal(true);
   };
   
@@ -47,7 +45,6 @@ export default function GoalsPage() {
     setMonth(new Date().getMonth() + 1);
     setYear(new Date().getFullYear());
     setRevenue('');
-    setWeddings('');
     setShowModal(true);
   };
 
