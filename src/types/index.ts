@@ -75,6 +75,26 @@ export interface Payment {
   createdAt: string;
 }
 
+export interface Goal {
+  id: string;
+  month: number;
+  year: number;
+  targetRevenue: number;
+  targetWeddings: number;
+  createdAt: string;
+}
+
+export interface PersonalProduction {
+  id: string;
+  title: string;
+  description?: string;
+  recordingDate?: string;
+  recordingTime?: string;
+  script?: string;
+  status: 'planned' | 'recorded' | 'edited' | 'published';
+  createdAt: string;
+}
+
 // ─────────────────────────────────────────────
 // Freelancer
 // ─────────────────────────────────────────────

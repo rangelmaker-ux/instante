@@ -12,11 +12,14 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
     "date-fns": "^4.4.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "lucide-react": "^1.33.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.85.0",
     "react-router-dom": "^7.18.2",
+    "recharts": "^2.12.7",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
