@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Target, Plus } from 'lucide-react';
 import { useCRMStore } from '../store/crmStore';
-import { formatCurrency } from '../lib/utils';
+import { formatCurrency } from '../lib/finance';
 import type { Goal } from '../types';
 
 export default function GoalsPage() {

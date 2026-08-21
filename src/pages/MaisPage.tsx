@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Target, Video, Briefcase, Download, DollarSign, Calendar } from 'lucide-react';
+import { Target, Video, Briefcase, Download, DollarSign } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { useJobStore } from '../store/jobStore';
-import { usePaymentStore } from '../store/paymentStore';
 import { useCRMStore } from '../store/crmStore';
-import { computeJobFinance } from '../lib/finance';
-import { formatCurrency } from '../lib/utils';
+import { computeJobFinance, formatCurrency } from '../lib/finance';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import {
@@ -16,14 +14,14 @@ import {
 
 export default function MaisPage() {
   const navigate = useNavigate();
-  const user = useAuthStore(s => s.user);
+  const user = useAuthStore((s: any) => s.user);
   const userName = user?.email ? user.email.split('@')[0].toUpperCase() : 'USUÁRIO';
   
   const jobs = useJobStore((s) => s.jobs);
-  const payments = usePaymentStore((s) => s.payments);
+  const payments = useJobStore((s) => s.payments);
   const jobFreelancers = useJobStore((s) => s.jobFreelancers);
   
-  const { goals, productions, fetchCRM } = useCRMStore();
+  const { goals, fetchCRM } = useCRMStore();
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
@@ -96,9 +94,9 @@ export default function MaisPage() {
       const wmImg = new Image();
       wmImg.src = '/logo.png';
       await new Promise(r => { wmImg.onload = r; });
-      pdf.setGState(new pdf.GState({ opacity: 0.3 }));
+      pdf.setGState(new (pdf.GState as any)({ opacity: 0.3 }));
       pdf.addImage(wmImg, 'PNG', 20, 100, pdfWidth - 40, (wmImg.height * (pdfWidth - 40)) / wmImg.width);
-      pdf.setGState(new pdf.GState({ opacity: 1 }));
+      pdf.setGState(new (pdf.GState as any)({ opacity: 1 }));
       
       // Content
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
