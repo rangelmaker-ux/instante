@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { useJobStore } from '../../store/jobStore';
@@ -140,12 +141,12 @@ export default function PaymentModal({ jobId, maxRangel, maxFelipe, maxCompany, 
           </div>
 
           <button type="submit" className="btn btn-primary btn-full" style={{ marginTop: 4 }}>
-            {payment ? 'Salvar alterações' : 'Adicionar pagamento'}
+            Registrar pagamento
           </button>
         </form>
       </div>
     </div>
   );
 
-  return typeof document !== 'undefined' ? (require('react-dom').createPortal(modalContent, document.body)) : modalContent;
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }

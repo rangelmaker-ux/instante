@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Video, Plus, Calendar, Clock, Trash } from 'lucide-react';
 import { useCRMStore } from '../store/crmStore';
 import type { PersonalProduction } from '../types';
@@ -124,7 +125,7 @@ export default function ProductionPage() {
         <Plus size={24} />
       </button>
 
-      {showModal && typeof document !== 'undefined' && require('react-dom').createPortal(
+      {showModal && typeof document !== 'undefined' && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-sheet animate-in" onClick={(e) => e.stopPropagation()} style={{ overflowY: 'auto' }}>
             <div className="modal-drag" />

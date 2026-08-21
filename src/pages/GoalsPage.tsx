@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Target, Plus } from 'lucide-react';
 import { useCRMStore } from '../store/crmStore';
 import { formatCurrency } from '../lib/finance';
@@ -83,7 +84,7 @@ export default function GoalsPage() {
         <Plus size={24} />
       </button>
 
-      {showModal && typeof document !== 'undefined' && require('react-dom').createPortal(
+      {showModal && typeof document !== 'undefined' && createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-sheet animate-in" onClick={(e) => e.stopPropagation()}>
             <div className="modal-drag" />

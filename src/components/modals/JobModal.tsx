@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { X, AlertCircle } from 'lucide-react';
 import { useJobStore } from '../../store/jobStore';
@@ -289,5 +290,5 @@ export default function JobModal({ job, preselectedClientId, onClose, onCreated 
     </div>
   );
 
-  return typeof document !== 'undefined' ? (require('react-dom').createPortal(modalContent, document.body)) : modalContent;
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }

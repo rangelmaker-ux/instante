@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { useClientStore } from '../../store/clientStore';
@@ -128,5 +129,5 @@ export default function ClientModal({ client, onClose }: Props) {
     </div>
   );
 
-  return typeof document !== 'undefined' ? (require('react-dom').createPortal(modalContent, document.body)) : modalContent;
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }
