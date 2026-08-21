@@ -143,12 +143,25 @@ const mapJFToDB = (jf: Partial<JobFreelancer>) => ({
   notes: jf.notes,
 });
 
+const JOBS_CACHE = 'instante_jobs';
+const PAYMENTS_CACHE = 'instante_payments';
+const CONTRACTS_CACHE = 'instante_contracts';
+const DELIVERIES_CACHE = 'instante_deliveries';
+const JF_CACHE = 'instante_job_freelancers';
+
+const getCache = <T>(key: string): T[] => {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : []; } catch { return []; }
+};
+const setCache = <T>(key: string, data: T[]) => {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+};
+
 export const useJobStore = create<JobStore>((set, get) => ({
-  jobs: [],
-  payments: [],
-  contracts: [],
-  deliveries: [],
-  jobFreelancers: [],
+  jobs: getCache<Job>(JOBS_CACHE),
+  payments: getCache<Payment>(PAYMENTS_CACHE),
+  contracts: getCache<Contract>(CONTRACTS_CACHE),
+  deliveries: getCache<Delivery>(DELIVERIES_CACHE),
+  jobFreelancers: getCache<JobFreelancer>(JF_CACHE),
   loading: false,
 
   fetchData: async () => {
@@ -162,16 +175,21 @@ export const useJobStore = create<JobStore>((set, get) => ({
         supabase.from('job_freelancers').select('*'),
       ]);
 
-      set({
-        jobs: (jobsRes.data || []).map(mapJobFromDB),
-        payments: (paymentsRes.data || []).map(mapPaymentFromDB),
-        contracts: (contractsRes.data || []).map(mapContractFromDB),
-        deliveries: (deliveriesRes.data || []).map(mapDeliveryFromDB),
-        jobFreelancers: (jfRes.data || []).map(mapJFFromDB),
-      });
+      const j = (jobsRes.data || []).map(mapJobFromDB);
+      const p = (paymentsRes.data || []).map(mapPaymentFromDB);
+      const c = (contractsRes.data || []).map(mapContractFromDB);
+      const d = (deliveriesRes.data || []).map(mapDeliveryFromDB);
+      const jf = (jfRes.data || []).map(mapJFFromDB);
+
+      if (j.length > 0) { set({ jobs: j }); setCache(JOBS_CACHE, j); }
+      if (p.length > 0) { set({ payments: p }); setCache(PAYMENTS_CACHE, p); }
+      if (c.length > 0) { set({ contracts: c }); setCache(CONTRACTS_CACHE, c); }
+      if (d.length > 0) { set({ deliveries: d }); setCache(DELIVERIES_CACHE, d); }
+      if (jf.length > 0) { set({ jobFreelancers: jf }); setCache(JF_CACHE, jf); }
+
+      set({ loading: false });
     } catch (e) {
       console.error(e);
-    } finally {
       set({ loading: false });
     }
   },
@@ -184,8 +202,11 @@ export const useJobStore = create<JobStore>((set, get) => ({
       createdAt: new Date().toISOString(),
     };
 
-    // Optimistic update
-    set((s) => ({ jobs: [...s.jobs, tempJob] }));
+    set((s) => {
+      const updated = [...s.jobs, tempJob];
+      setCache(JOBS_CACHE, updated);
+      return { jobs: updated };
+    });
 
     try {
       const { data: newRow, error } = await supabase.from('jobs').insert([mapJobToDB(data)]).select().single();
@@ -193,7 +214,11 @@ export const useJobStore = create<JobStore>((set, get) => ({
         console.error('Supabase addJob error:', error);
       } else if (newRow) {
         const parsed = mapJobFromDB(newRow);
-        set((s) => ({ jobs: s.jobs.map((j) => (j.id === tempId ? parsed : j)) }));
+        set((s) => {
+          const updated = s.jobs.map((j) => (j.id === tempId ? parsed : j));
+          setCache(JOBS_CACHE, updated);
+          return { jobs: updated };
+        });
         return parsed.id;
       }
     } catch (e) {
@@ -202,7 +227,11 @@ export const useJobStore = create<JobStore>((set, get) => ({
     return tempId;
   },
   updateJob: async (id, data) => {
-    set((s) => ({ jobs: s.jobs.map((j) => (j.id === id ? { ...j, ...data } : j)) }));
+    set((s) => {
+      const updated = s.jobs.map((j) => (j.id === id ? { ...j, ...data } : j));
+      setCache(JOBS_CACHE, updated);
+      return { jobs: updated };
+    });
     try {
       const { error } = await supabase.from('jobs').update(mapJobToDB(data)).eq('id', id);
       if (error) console.error('Supabase updateJob error:', error);
@@ -211,13 +240,17 @@ export const useJobStore = create<JobStore>((set, get) => ({
     }
   },
   deleteJob: async (id) => {
-    set((s) => ({
-      jobs: s.jobs.filter((j) => j.id !== id),
-      payments: s.payments.filter((p) => p.jobId !== id),
-      contracts: s.contracts.filter((c) => c.jobId !== id),
-      deliveries: s.deliveries.filter((d) => d.jobId !== id),
-      jobFreelancers: s.jobFreelancers.filter((jf) => jf.jobId !== id),
-    }));
+    set((s) => {
+      const updatedJobs = s.jobs.filter((j) => j.id !== id);
+      setCache(JOBS_CACHE, updatedJobs);
+      return {
+        jobs: updatedJobs,
+        payments: s.payments.filter((p) => p.jobId !== id),
+        contracts: s.contracts.filter((c) => c.jobId !== id),
+        deliveries: s.deliveries.filter((d) => d.jobId !== id),
+        jobFreelancers: s.jobFreelancers.filter((jf) => jf.jobId !== id),
+      };
+    });
     try {
       const { error } = await supabase.from('jobs').delete().eq('id', id);
       if (error) console.error('Supabase deleteJob error:', error);
@@ -235,21 +268,33 @@ export const useJobStore = create<JobStore>((set, get) => ({
       createdAt: new Date().toISOString(),
     };
 
-    set((s) => ({ payments: [...s.payments, tempPayment] }));
+    set((s) => {
+      const updated = [...s.payments, tempPayment];
+      setCache(PAYMENTS_CACHE, updated);
+      return { payments: updated };
+    });
 
     try {
       const { data: newRow, error } = await supabase.from('payments').insert([mapPaymentToDB(data)]).select().single();
       if (error) {
         console.error('Supabase addPayment error:', error);
       } else if (newRow) {
-        set((s) => ({ payments: s.payments.map((p) => (p.id === tempId ? mapPaymentFromDB(newRow) : p)) }));
+        set((s) => {
+          const updated = s.payments.map((p) => (p.id === tempId ? mapPaymentFromDB(newRow) : p));
+          setCache(PAYMENTS_CACHE, updated);
+          return { payments: updated };
+        });
       }
     } catch (e) {
       console.error('Network error addPayment:', e);
     }
   },
   deletePayment: async (id) => {
-    set((s) => ({ payments: s.payments.filter((p) => p.id !== id) }));
+    set((s) => {
+      const updated = s.payments.filter((p) => p.id !== id);
+      setCache(PAYMENTS_CACHE, updated);
+      return { payments: updated };
+    });
     try {
       const { error } = await supabase.from('payments').delete().eq('id', id);
       if (error) console.error('Supabase deletePayment error:', error);
@@ -267,21 +312,33 @@ export const useJobStore = create<JobStore>((set, get) => ({
       uploadedAt: new Date().toISOString(),
     };
 
-    set((s) => ({ contracts: [...s.contracts, tempContract] }));
+    set((s) => {
+      const updated = [...s.contracts, tempContract];
+      setCache(CONTRACTS_CACHE, updated);
+      return { contracts: updated };
+    });
 
     try {
       const { data: newRow, error } = await supabase.from('contracts').insert([mapContractToDB(data)]).select().single();
       if (error) {
         console.error('Supabase addContract error:', error);
       } else if (newRow) {
-        set((s) => ({ contracts: s.contracts.map((c) => (c.id === tempId ? mapContractFromDB(newRow) : c)) }));
+        set((s) => {
+          const updated = s.contracts.map((c) => (c.id === tempId ? mapContractFromDB(newRow) : c));
+          setCache(CONTRACTS_CACHE, updated);
+          return { contracts: updated };
+        });
       }
     } catch (e) {
       console.error('Network error addContract:', e);
     }
   },
   deleteContract: async (id) => {
-    set((s) => ({ contracts: s.contracts.filter((c) => c.id !== id) }));
+    set((s) => {
+      const updated = s.contracts.filter((c) => c.id !== id);
+      setCache(CONTRACTS_CACHE, updated);
+      return { contracts: updated };
+    });
     try {
       const { error } = await supabase.from('contracts').delete().eq('id', id);
       if (error) console.error('Supabase deleteContract error:', error);
@@ -298,21 +355,33 @@ export const useJobStore = create<JobStore>((set, get) => ({
       deliveredAt: new Date().toISOString(),
     };
 
-    set((s) => ({ deliveries: [...s.deliveries, tempDelivery] }));
+    set((s) => {
+      const updated = [...s.deliveries, tempDelivery];
+      setCache(DELIVERIES_CACHE, updated);
+      return { deliveries: updated };
+    });
 
     try {
       const { data: newRow, error } = await supabase.from('deliveries').insert([mapDeliveryToDB(data)]).select().single();
       if (error) {
         console.error('Supabase addDelivery error:', error);
       } else if (newRow) {
-        set((s) => ({ deliveries: s.deliveries.map((d) => (d.id === tempId ? mapDeliveryFromDB(newRow) : d)) }));
+        set((s) => {
+          const updated = s.deliveries.map((d) => (d.id === tempId ? mapDeliveryFromDB(newRow) : d));
+          setCache(DELIVERIES_CACHE, updated);
+          return { deliveries: updated };
+        });
       }
     } catch (e) {
       console.error('Network error addDelivery:', e);
     }
   },
   deleteDelivery: async (id) => {
-    set((s) => ({ deliveries: s.deliveries.filter((d) => d.id !== id) }));
+    set((s) => {
+      const updated = s.deliveries.filter((d) => d.id !== id);
+      setCache(DELIVERIES_CACHE, updated);
+      return { deliveries: updated };
+    });
     try {
       const { error } = await supabase.from('deliveries').delete().eq('id', id);
       if (error) console.error('Supabase deleteDelivery error:', error);
@@ -329,23 +398,33 @@ export const useJobStore = create<JobStore>((set, get) => ({
       createdAt: new Date().toISOString(),
     };
 
-    set((s) => ({ jobFreelancers: [...s.jobFreelancers, tempJF] }));
+    set((s) => {
+      const updated = [...s.jobFreelancers, tempJF];
+      setCache(JF_CACHE, updated);
+      return { jobFreelancers: updated };
+    });
 
     try {
       const { data: newRow, error } = await supabase.from('job_freelancers').insert([mapJFToDB(data)]).select().single();
       if (error) {
         console.error('Supabase addJobFreelancer error:', error);
       } else if (newRow) {
-        set((s) => ({ jobFreelancers: s.jobFreelancers.map((jf) => (jf.id === tempId ? mapJFFromDB(newRow) : jf)) }));
+        set((s) => {
+          const updated = s.jobFreelancers.map((jf) => (jf.id === tempId ? mapJFFromDB(newRow) : jf));
+          setCache(JF_CACHE, updated);
+          return { jobFreelancers: updated };
+        });
       }
     } catch (e) {
       console.error('Network error addJobFreelancer:', e);
     }
   },
   updateJobFreelancer: async (id, data) => {
-    set((s) => ({
-      jobFreelancers: s.jobFreelancers.map((jf) => (jf.id === id ? { ...jf, ...data } : jf)),
-    }));
+    set((s) => {
+      const updated = s.jobFreelancers.map((jf) => (jf.id === id ? { ...jf, ...data } : jf));
+      setCache(JF_CACHE, updated);
+      return { jobFreelancers: updated };
+    });
     try {
       const { error } = await supabase.from('job_freelancers').update(mapJFToDB(data)).eq('id', id);
       if (error) console.error('Supabase updateJobFreelancer error:', error);
@@ -354,7 +433,11 @@ export const useJobStore = create<JobStore>((set, get) => ({
     }
   },
   deleteJobFreelancer: async (id) => {
-    set((s) => ({ jobFreelancers: s.jobFreelancers.filter((jf) => jf.id !== id) }));
+    set((s) => {
+      const updated = s.jobFreelancers.filter((jf) => jf.id !== id);
+      setCache(JF_CACHE, updated);
+      return { jobFreelancers: updated };
+    });
     try {
       const { error } = await supabase.from('job_freelancers').delete().eq('id', id);
       if (error) console.error('Supabase deleteJobFreelancer error:', error);

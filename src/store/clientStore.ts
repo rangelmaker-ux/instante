@@ -12,20 +12,38 @@ interface ClientStore {
   getClient: (id: string) => Client | undefined;
 }
 
+const CACHE_KEY = 'instante_clients';
+
+const getCachedClients = (): Client[] => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+const setCachedClients = (clients: Client[]) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(clients));
+  } catch {}
+};
+
 export const useClientStore = create<ClientStore>((set, get) => ({
-  clients: [],
+  clients: getCachedClients(),
   loading: false,
   fetchClients: async () => {
     set({ loading: true });
     try {
       const { data, error } = await supabase.from('clients').select('*').order('name');
       if (error) console.error('Supabase fetchClients error:', error);
-      if (data) {
+      if (data && data.length > 0) {
         const mapped = data.map((d: any) => ({
           ...d,
           createdAt: d.created_at || new Date().toISOString(),
         }));
         set({ clients: mapped as Client[], loading: false });
+        setCachedClients(mapped as Client[]);
       } else {
         set({ loading: false });
       }
@@ -42,10 +60,12 @@ export const useClientStore = create<ClientStore>((set, get) => ({
       createdAt: new Date().toISOString(),
     };
 
-    // Optimistic update - show immediately in UI
-    set((s) => ({
-      clients: [...s.clients, tempClient].sort((a, b) => a.name.localeCompare(b.name)),
-    }));
+    // Immediate state + cache update
+    set((s) => {
+      const updated = [...s.clients, tempClient].sort((a, b) => a.name.localeCompare(b.name));
+      setCachedClients(updated);
+      return { clients: updated };
+    });
 
     try {
       const dbPayload = {
@@ -60,18 +80,24 @@ export const useClientStore = create<ClientStore>((set, get) => ({
       if (error) {
         console.error('Supabase addClient error:', error);
       } else if (newClient) {
-        set((s) => ({
-          clients: s.clients
+        set((s) => {
+          const updated = s.clients
             .map((c) => (c.id === tempId ? { ...newClient, createdAt: newClient.created_at } as Client : c))
-            .sort((a, b) => a.name.localeCompare(b.name)),
-        }));
+            .sort((a, b) => a.name.localeCompare(b.name));
+          setCachedClients(updated);
+          return { clients: updated };
+        });
       }
     } catch (e) {
       console.error('Network error addClient:', e);
     }
   },
   updateClient: async (id, data) => {
-    set((s) => ({ clients: s.clients.map((c) => (c.id === id ? { ...c, ...data } : c)) }));
+    set((s) => {
+      const updated = s.clients.map((c) => (c.id === id ? { ...c, ...data } : c));
+      setCachedClients(updated);
+      return { clients: updated };
+    });
     try {
       const { error } = await supabase.from('clients').update(data).eq('id', id);
       if (error) console.error('Supabase updateClient error:', error);
@@ -80,7 +106,11 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     }
   },
   deleteClient: async (id) => {
-    set((s) => ({ clients: s.clients.filter((c) => c.id !== id) }));
+    set((s) => {
+      const updated = s.clients.filter((c) => c.id !== id);
+      setCachedClients(updated);
+      return { clients: updated };
+    });
     try {
       const { error } = await supabase.from('clients').delete().eq('id', id);
       if (error) console.error('Supabase deleteClient error:', error);
