@@ -457,24 +457,25 @@ textarea.form-input {
   inset: 0;
   background: rgba(44,35,24,0.45);
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   z-index: 500;
   animation: fadeIn 0.18s ease;
-  overscroll-behavior: none;
+  overflow: hidden; /* Prevent overlay from scrolling */
 }
 
 .modal-sheet {
   width: 100%;
   max-width: 430px;
-  margin: 0 auto;
+  margin: auto auto 0 auto; /* Push to bottom naturally */
   background: var(--surface);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   padding: 20px 16px 32px;
   animation: slideUp 0.22s ease;
-  max-height: 92svh;
+  max-height: 90dvh; /* Dynamic viewport height */
   overflow-y: auto;
-  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  flex-shrink: 1; /* Allow it to shrink if viewport is small */
 }
 
 .modal-drag {
