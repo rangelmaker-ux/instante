@@ -80,7 +80,7 @@ export default function PaymentModal({ jobId, maxRangel, maxFelipe, maxCompany, 
     onClose();
   };
 
-  return (
+  const modalContent = (
     <div className="modal-overlay" ref={overlayRef} onClick={handleOverlayClick}>
       <div className="modal-sheet animate-in">
         <div className="modal-drag" />
@@ -140,10 +140,12 @@ export default function PaymentModal({ jobId, maxRangel, maxFelipe, maxCompany, 
           </div>
 
           <button type="submit" className="btn btn-primary btn-full" style={{ marginTop: 4 }}>
-            Registrar pagamento
+            {payment ? 'Salvar alterações' : 'Adicionar pagamento'}
           </button>
         </form>
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? (require('react-dom').createPortal(modalContent, document.body)) : modalContent;
 }

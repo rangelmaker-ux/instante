@@ -124,7 +124,7 @@ export default function ProductionPage() {
         <Plus size={24} />
       </button>
 
-      {showModal && (
+      {showModal && typeof document !== 'undefined' && require('react-dom').createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-sheet animate-in" onClick={(e) => e.stopPropagation()} style={{ overflowY: 'auto' }}>
             <div className="modal-drag" />
@@ -181,7 +181,8 @@ export default function ProductionPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

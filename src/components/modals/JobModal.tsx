@@ -119,7 +119,7 @@ export default function JobModal({ job, preselectedClientId, onClose, onCreated 
     }
   };
 
-  return (
+  const modalContent = (
     <div className="modal-overlay" ref={overlayRef} onClick={handleOverlayClick}>
       <div className="modal-sheet animate-in">
         <div className="modal-drag" />
@@ -288,4 +288,6 @@ export default function JobModal({ job, preselectedClientId, onClose, onCreated 
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? (require('react-dom').createPortal(modalContent, document.body)) : modalContent;
 }

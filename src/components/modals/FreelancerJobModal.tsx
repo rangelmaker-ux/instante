@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { useJobStore } from '../../store/jobStore';
@@ -55,7 +56,7 @@ export default function FreelancerJobModal({ jobId, onClose }: Props) {
     onClose();
   };
 
-  return (
+  const modalContent = (
     <div className="modal-overlay" ref={overlayRef} onClick={handleOverlayClick}>
       <div className="modal-sheet animate-in">
         <div className="modal-drag" />
@@ -122,11 +123,13 @@ export default function FreelancerJobModal({ jobId, onClose }: Props) {
             </div>
 
             <button type="submit" className="btn btn-primary btn-full" style={{ marginTop: 4 }}>
-              Adicionar ao projeto
+              Vincular Freelancer
             </button>
           </form>
         )}
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 }

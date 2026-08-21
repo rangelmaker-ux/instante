@@ -83,7 +83,7 @@ export default function GoalsPage() {
         <Plus size={24} />
       </button>
 
-      {showModal && (
+      {showModal && typeof document !== 'undefined' && require('react-dom').createPortal(
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-sheet animate-in" onClick={(e) => e.stopPropagation()}>
             <div className="modal-drag" />
@@ -110,7 +110,8 @@ export default function GoalsPage() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
