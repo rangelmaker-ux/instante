@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
 import { useAuthStore } from './store/authStore';
 import { useClientStore } from './store/clientStore';
+import { useJobStore } from './store/jobStore';
+import { useFreelancerStore, useEquipmentStore } from './store/otherStores';
 import BottomNav from './components/layout/BottomNav';
 import LoginPage       from './pages/LoginPage';
 import DashboardPage   from './pages/DashboardPage';
@@ -19,6 +21,9 @@ import InboxPage       from './pages/InboxPage';
 export default function App() {
   const { session, initialized, initialize } = useAuthStore();
   const fetchClients = useClientStore((s) => s.fetchClients);
+  const fetchJobsData = useJobStore((s) => s.fetchData);
+  const fetchFreelancers = useFreelancerStore((s) => s.fetchFreelancers);
+  const fetchRentals = useEquipmentStore((s) => s.fetchRentals);
 
   useEffect(() => {
     initialize();
@@ -27,8 +32,11 @@ export default function App() {
   useEffect(() => {
     if (session) {
       fetchClients();
+      fetchJobsData();
+      fetchFreelancers();
+      fetchRentals();
     }
-  }, [session, fetchClients]);
+  }, [session, fetchClients, fetchJobsData, fetchFreelancers, fetchRentals]);
 
   if (!initialized) {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Carregando...</div>;

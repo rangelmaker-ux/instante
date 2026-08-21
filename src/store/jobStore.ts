@@ -1,8 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type { Job, Payment, Contract, Delivery, JobFreelancer } from '../types';
-
-const uid = () => Math.random().toString(36).slice(2, 10);
+import { supabase } from '../lib/supabase';
 
 interface JobStore {
   jobs: Job[];
@@ -10,111 +8,247 @@ interface JobStore {
   contracts: Contract[];
   deliveries: Delivery[];
   jobFreelancers: JobFreelancer[];
+  loading: boolean;
+  
+  fetchData: () => Promise<void>;
 
   // Jobs
-  addJob: (j: Omit<Job, 'id' | 'createdAt'>) => string;
-  updateJob: (id: string, data: Partial<Job>) => void;
-  deleteJob: (id: string) => void;
+  addJob: (j: Omit<Job, 'id' | 'createdAt'>) => Promise<string | undefined>;
+  updateJob: (id: string, data: Partial<Job>) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
   getJob: (id: string) => Job | undefined;
 
   // Payments
-  addPayment: (p: Omit<Payment, 'id' | 'createdAt'>) => void;
-  deletePayment: (id: string) => void;
+  addPayment: (p: Omit<Payment, 'id' | 'createdAt'>) => Promise<void>;
+  deletePayment: (id: string) => Promise<void>;
   getPaymentsForJob: (jobId: string) => Payment[];
 
   // Contracts
-  addContract: (c: Omit<Contract, 'id' | 'uploadedAt'>) => void;
-  deleteContract: (id: string) => void;
+  addContract: (c: Omit<Contract, 'id' | 'uploadedAt'>) => Promise<void>;
+  deleteContract: (id: string) => Promise<void>;
 
   // Deliveries
-  addDelivery: (d: Omit<Delivery, 'id'>) => void;
-  deleteDelivery: (id: string) => void;
+  addDelivery: (d: Omit<Delivery, 'id'>) => Promise<void>;
+  deleteDelivery: (id: string) => Promise<void>;
 
   // Freelancers on Job
-  addJobFreelancer: (jf: Omit<JobFreelancer, 'id' | 'createdAt'>) => void;
-  updateJobFreelancer: (id: string, data: Partial<JobFreelancer>) => void;
-  deleteJobFreelancer: (id: string) => void;
+  addJobFreelancer: (jf: Omit<JobFreelancer, 'id' | 'createdAt'>) => Promise<void>;
+  updateJobFreelancer: (id: string, data: Partial<JobFreelancer>) => Promise<void>;
+  deleteJobFreelancer: (id: string) => Promise<void>;
   getJobFreelancers: (jobId: string) => JobFreelancer[];
 }
 
-export const useJobStore = create<JobStore>()(
-  persist(
-    (set, get) => ({
-      jobs: [],
-      payments: [],
-      contracts: [],
-      deliveries: [],
-      jobFreelancers: [],
+// Helpers to map camelCase <-> snake_case
+const mapJobFromDB = (d: any): Job => ({
+  id: d.id,
+  clientId: d.client_id,
+  title: d.title,
+  description: d.description,
+  status: d.status,
+  totalValue: Number(d.total_value),
+  rangelValue: Number(d.rangel_value),
+  felipeValue: Number(d.felipe_value),
+  companyValue: Number(d.company_value),
+  meetingDate: d.meeting_date,
+  serviceDate: d.service_date,
+  deliveryDeadline: d.delivery_deadline,
+  location: d.location,
+  notes: d.notes,
+  createdAt: d.created_at,
+});
+const mapJobToDB = (j: Partial<Job>) => ({
+  client_id: j.clientId,
+  title: j.title,
+  description: j.description,
+  status: j.status,
+  total_value: j.totalValue,
+  rangel_value: j.rangelValue,
+  felipe_value: j.felipeValue,
+  company_value: j.companyValue,
+  meeting_date: j.meetingDate,
+  service_date: j.serviceDate,
+  delivery_deadline: j.deliveryDeadline,
+  location: j.location,
+  notes: j.notes,
+});
 
-      addJob: (data) => {
-        const id = uid();
-        set((s) => ({
-          jobs: [...s.jobs, { ...data, id, createdAt: new Date().toISOString() }],
-        }));
-        return id;
-      },
-      updateJob: (id, data) =>
-        set((s) => ({
-          jobs: s.jobs.map((j) => (j.id === id ? { ...j, ...data } : j)),
-        })),
-      deleteJob: (id) =>
-        set((s) => ({
-          jobs: s.jobs.filter((j) => j.id !== id),
-          payments: s.payments.filter((p) => p.jobId !== id),
-          contracts: s.contracts.filter((c) => c.jobId !== id),
-          deliveries: s.deliveries.filter((d) => d.jobId !== id),
-          jobFreelancers: s.jobFreelancers.filter((jf) => jf.jobId !== id),
-        })),
-      getJob: (id) => get().jobs.find((j) => j.id === id),
+const mapPaymentFromDB = (d: any): Payment => ({
+  id: d.id,
+  jobId: d.job_id,
+  amount: Number(d.amount),
+  date: d.date,
+  recipient: d.recipient,
+  note: d.note,
+  createdAt: d.created_at,
+});
+const mapPaymentToDB = (p: Partial<Payment>) => ({
+  job_id: p.jobId,
+  amount: p.amount,
+  date: p.date,
+  recipient: p.recipient,
+  note: p.note,
+});
 
-      addPayment: (data) =>
-        set((s) => ({
-          payments: [
-            ...s.payments,
-            { ...data, id: uid(), createdAt: new Date().toISOString() },
-          ],
-        })),
-      deletePayment: (id) =>
-        set((s) => ({ payments: s.payments.filter((p) => p.id !== id) })),
-      getPaymentsForJob: (jobId) => get().payments.filter((p) => p.jobId === jobId),
+const mapContractFromDB = (d: any): Contract => ({
+  id: d.id,
+  jobId: d.job_id,
+  label: d.label,
+  fileUrl: d.file_url,
+  type: d.type,
+  uploadedAt: d.uploaded_at,
+});
+const mapContractToDB = (c: Partial<Contract>) => ({
+  job_id: c.jobId,
+  label: c.label,
+  file_url: c.fileUrl,
+  type: c.type,
+});
 
-      addContract: (data) =>
-        set((s) => ({
-          contracts: [
-            ...s.contracts,
-            { ...data, id: uid(), uploadedAt: new Date().toISOString() },
-          ],
-        })),
-      deleteContract: (id) =>
-        set((s) => ({ contracts: s.contracts.filter((c) => c.id !== id) })),
+const mapDeliveryFromDB = (d: any): Delivery => ({
+  id: d.id,
+  jobId: d.job_id,
+  label: d.label,
+  link: d.link,
+  type: d.type,
+  deliveredAt: d.delivered_at,
+});
+const mapDeliveryToDB = (d: Partial<Delivery>) => ({
+  job_id: d.jobId,
+  label: d.label,
+  link: d.link,
+  type: d.type,
+  delivered_at: d.deliveredAt,
+});
 
-      addDelivery: (data) =>
-        set((s) => ({
-          deliveries: [...s.deliveries, { ...data, id: uid() }],
-        })),
-      deleteDelivery: (id) =>
-        set((s) => ({ deliveries: s.deliveries.filter((d) => d.id !== id) })),
+const mapJFFromDB = (d: any): JobFreelancer => ({
+  id: d.id,
+  jobId: d.job_id,
+  freelancerId: d.freelancer_id,
+  role: d.role,
+  value: Number(d.value),
+  paymentMode: d.payment_mode,
+  status: d.status,
+  paymentDate: d.payment_date,
+  notes: d.notes,
+  createdAt: d.created_at,
+});
+const mapJFToDB = (jf: Partial<JobFreelancer>) => ({
+  job_id: jf.jobId,
+  freelancer_id: jf.freelancerId,
+  role: jf.role,
+  value: jf.value,
+  payment_mode: jf.paymentMode,
+  status: jf.status,
+  payment_date: jf.paymentDate,
+  notes: jf.notes,
+});
 
-      addJobFreelancer: (data) =>
-        set((s) => ({
-          jobFreelancers: [
-            ...s.jobFreelancers,
-            { ...data, id: uid(), createdAt: new Date().toISOString() },
-          ],
-        })),
-      updateJobFreelancer: (id, data) =>
-        set((s) => ({
-          jobFreelancers: s.jobFreelancers.map((jf) =>
-            jf.id === id ? { ...jf, ...data } : jf
-          ),
-        })),
-      deleteJobFreelancer: (id) =>
-        set((s) => ({
-          jobFreelancers: s.jobFreelancers.filter((jf) => jf.id !== id),
-        })),
-      getJobFreelancers: (jobId) =>
-        get().jobFreelancers.filter((jf) => jf.jobId === jobId),
-    }),
-    { name: 'instante-jobs' }
-  )
-);
+export const useJobStore = create<JobStore>((set, get) => ({
+  jobs: [],
+  payments: [],
+  contracts: [],
+  deliveries: [],
+  jobFreelancers: [],
+  loading: false,
+
+  fetchData: async () => {
+    set({ loading: true });
+    try {
+      const [jobsRes, paymentsRes, contractsRes, deliveriesRes, jfRes] = await Promise.all([
+        supabase.from('jobs').select('*'),
+        supabase.from('payments').select('*'),
+        supabase.from('contracts').select('*'),
+        supabase.from('deliveries').select('*'),
+        supabase.from('job_freelancers').select('*'),
+      ]);
+
+      set({
+        jobs: (jobsRes.data || []).map(mapJobFromDB),
+        payments: (paymentsRes.data || []).map(mapPaymentFromDB),
+        contracts: (contractsRes.data || []).map(mapContractFromDB),
+        deliveries: (deliveriesRes.data || []).map(mapDeliveryFromDB),
+        jobFreelancers: (jfRes.data || []).map(mapJFFromDB),
+      });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  addJob: async (data) => {
+    const { data: newRow, error } = await supabase.from('jobs').insert([mapJobToDB(data)]).select().single();
+    if (!error && newRow) {
+      const parsed = mapJobFromDB(newRow);
+      set((s) => ({ jobs: [...s.jobs, parsed] }));
+      return parsed.id;
+    }
+  },
+  updateJob: async (id, data) => {
+    set((s) => ({ jobs: s.jobs.map((j) => (j.id === id ? { ...j, ...data } : j)) }));
+    await supabase.from('jobs').update(mapJobToDB(data)).eq('id', id);
+  },
+  deleteJob: async (id) => {
+    set((s) => ({
+      jobs: s.jobs.filter((j) => j.id !== id),
+      payments: s.payments.filter((p) => p.jobId !== id),
+      contracts: s.contracts.filter((c) => c.jobId !== id),
+      deliveries: s.deliveries.filter((d) => d.jobId !== id),
+      jobFreelancers: s.jobFreelancers.filter((jf) => jf.jobId !== id),
+    }));
+    await supabase.from('jobs').delete().eq('id', id);
+  },
+  getJob: (id) => get().jobs.find((j) => j.id === id),
+
+  addPayment: async (data) => {
+    const { data: newRow, error } = await supabase.from('payments').insert([mapPaymentToDB(data)]).select().single();
+    if (!error && newRow) {
+      set((s) => ({ payments: [...s.payments, mapPaymentFromDB(newRow)] }));
+    }
+  },
+  deletePayment: async (id) => {
+    set((s) => ({ payments: s.payments.filter((p) => p.id !== id) }));
+    await supabase.from('payments').delete().eq('id', id);
+  },
+  getPaymentsForJob: (jobId) => get().payments.filter((p) => p.jobId === jobId),
+
+  addContract: async (data) => {
+    const { data: newRow, error } = await supabase.from('contracts').insert([mapContractToDB(data)]).select().single();
+    if (!error && newRow) {
+      set((s) => ({ contracts: [...s.contracts, mapContractFromDB(newRow)] }));
+    }
+  },
+  deleteContract: async (id) => {
+    set((s) => ({ contracts: s.contracts.filter((c) => c.id !== id) }));
+    await supabase.from('contracts').delete().eq('id', id);
+  },
+
+  addDelivery: async (data) => {
+    const { data: newRow, error } = await supabase.from('deliveries').insert([mapDeliveryToDB(data)]).select().single();
+    if (!error && newRow) {
+      set((s) => ({ deliveries: [...s.deliveries, mapDeliveryFromDB(newRow)] }));
+    }
+  },
+  deleteDelivery: async (id) => {
+    set((s) => ({ deliveries: s.deliveries.filter((d) => d.id !== id) }));
+    await supabase.from('deliveries').delete().eq('id', id);
+  },
+
+  addJobFreelancer: async (data) => {
+    const { data: newRow, error } = await supabase.from('job_freelancers').insert([mapJFToDB(data)]).select().single();
+    if (!error && newRow) {
+      set((s) => ({ jobFreelancers: [...s.jobFreelancers, mapJFFromDB(newRow)] }));
+    }
+  },
+  updateJobFreelancer: async (id, data) => {
+    set((s) => ({
+      jobFreelancers: s.jobFreelancers.map((jf) => (jf.id === id ? { ...jf, ...data } : jf)),
+    }));
+    await supabase.from('job_freelancers').update(mapJFToDB(data)).eq('id', id);
+  },
+  deleteJobFreelancer: async (id) => {
+    set((s) => ({ jobFreelancers: s.jobFreelancers.filter((jf) => jf.id !== id) }));
+    await supabase.from('job_freelancers').delete().eq('id', id);
+  },
+  getJobFreelancers: (jobId) => get().jobFreelancers.filter((jf) => jf.jobId === jobId),
+}));
