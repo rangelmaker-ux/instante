@@ -59,6 +59,7 @@ export default function App() {
         <Route path="/clientes/:id"      element={<><ClientDetailPage /><BottomNav /></>} />
         <Route path="/agenda"            element={<><AgendaPage       /><BottomNav /></>} />
         <Route path="/mais"              element={<><CRMPage          /><BottomNav /></>} />
+        <Route path="/crm"               element={<><CRMPage          /><BottomNav /></>} />
         <Route path="/metas"             element={<><GoalsPage        /><BottomNav /></>} />
         <Route path="/producao"          element={<><ProductionPage   /><BottomNav /></>} />
         <Route path="/freelancers"       element={<><FreelancersPage  /><BottomNav /></>} />

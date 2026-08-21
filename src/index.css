@@ -360,10 +360,16 @@ textarea.form-input {
   align-items: center;
   z-index: 300;
   box-shadow: 0 -2px 12px rgba(44,35,24,0.06);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+.bottom-nav::-webkit-scrollbar { display: none; }
 
 .nav-item {
   flex: 1;
+  min-width: 52px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
