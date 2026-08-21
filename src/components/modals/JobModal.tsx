@@ -90,7 +90,7 @@ export default function JobModal({ job, preselectedClientId, onClose, onCreated 
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     if (splitDiff > 0.01 && watchedTotal > 0 && splitSum > 0) return;
 
     const payload = {
@@ -110,12 +110,12 @@ export default function JobModal({ job, preselectedClientId, onClose, onCreated 
     };
 
     if (job) {
-      updateJob(job.id, payload);
+      await updateJob(job.id, payload);
       onClose();
     } else {
-      const id = addJob(payload);
+      const id = await addJob(payload);
       onClose();
-      onCreated?.(id);
+      if (id) onCreated?.(id);
     }
   };
 
